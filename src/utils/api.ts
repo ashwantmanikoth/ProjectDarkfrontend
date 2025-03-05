@@ -1,0 +1,27 @@
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
+
+export const uploadPDF = async (file: File) => {
+    console.log("uploading file")
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await axios.post(`${API_URL}/upload`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+
+    return response.data;
+};
+
+export const searchDocuments = async (query: string) => {
+    console.log("searching file")
+
+    const response = await axios.post(`${API_URL}/query`, {
+        query: query,
+    });
+    console.log(response)
+    return response;
+};
