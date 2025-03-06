@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
+const API_URL = process.env.FLASK_URL || 'http://127.0.0.1:5000';
 
 export const uploadPDF = async (file: File) => {
     console.log("uploading file")

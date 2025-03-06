@@ -8,7 +8,7 @@ const Home: NextPage = () => {
   return (
     <ProtectedRoute>
       <Layout>
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-sky-100">
           <h1 className="text-4xl font-bold mb-4 text-center">
            Search anything from you thousands of documents, within fraction of seconds.
           </h1>

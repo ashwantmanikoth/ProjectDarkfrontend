@@ -1,38 +1,18 @@
-import { createContext, useContext, useState, ReactNode } from "react";
-import { useRouter } from "next/router";
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => Promise<boolean>;
+  login: () => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const login = async (
-    username: string,
-    password: string
-  ): Promise<boolean> => {
-    // Replace with your authentication logic
-    if (username === "admin" && password === "admin") {
-      setIsAuthenticated(true);
-      localStorage.setItem("auth", "true");
-      router.push("/");
-      return true;
-    }
-    return false;
-  };
-
-  const logout = async (): Promise<boolean> => {
-    setIsAuthenticated(false);
-    localStorage.removeItem("auth");
-    await router.push("/login");
-    return true;
-  };
+  const login = () => setIsAuthenticated(true);
+  const logout = () => setIsAuthenticated(false);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
@@ -44,7 +24,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
