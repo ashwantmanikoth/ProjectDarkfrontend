@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { uploadPDF } from "../utils/api";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "../components/ProtectedRoute";
 import Layout from "../components/Layout";
 
 const UploadPage = () => {

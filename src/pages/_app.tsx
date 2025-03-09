@@ -3,7 +3,7 @@
 import { SessionProvider } from "next-auth/react";
 import "../styles/globals.css";
 import { AppProps } from "next/app";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "../context/AuthContext";
 
 function MyApp({
   Component,

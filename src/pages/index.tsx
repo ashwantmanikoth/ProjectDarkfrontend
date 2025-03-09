@@ -1,15 +1,15 @@
 import React from "react";
 import { NextPage } from "next";
 import Link from "next/link";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Layout from "@/components/Layout";
+import ProtectedRoute from "../components/ProtectedRoute";
+import Layout from "../components/Layout";
 
 const Home: NextPage = () => {
   return (
     <ProtectedRoute>
       <Layout>
-        <div className="flex flex-col items-center justify-center min-h-screen bg-sky-100">
-          <h1 className="text-4xl font-bold mb-4 text-center">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-sky-100 bg-gradient-to-br from-green-200 to-blue-400">
+          <h1 className="text-4xl font-bold mb-4 text-center text-black">
            Search anything from you thousands of documents, within fraction of seconds.
           </h1>
           {/* <p className="text-lg mb-8">
