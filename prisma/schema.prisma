@@ -1,0 +1,78 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Uses the database URL from the .env file
+}
+
+generator client {
+  provider = "prisma-client-js" // Generates the Prisma client for usage in code
+}
+
+enum MembershipType {
+  FREE  // Basic membership with limited features
+  PRO   // Paid membership with additional features
+  ULTRA // Highest-tier membership with all features
+}
+
+model User {
+  id            String   @id @default(cuid())  // Unique user ID
+  name          String?  // User's full name (optional)
+  email         String   @unique  // Unique email address for authentication
+  emailVerified DateTime? // When email was verified (null if not verified)
+  image         String?  // Profile picture URL
+  createdAt     DateTime @default(now()) // Auto-created timestamp
+  updatedAt     DateTime @updatedAt // Auto-updated timestamp
+  blocked       Boolean  @default(false) // If true, user is blocked from logging in
+  role          String   @default("user") // "user" or "admin" for access control
+  membership    MembershipType @default(FREE) // User's membership level (FREE/PRO/ULTRA)
+  subscription  Subscription? @relation // Subscription relation
+  subscriptionId String? // Foreign key to active subscription
+  accounts      Account[] // OAuth accounts linked to the user
+  // sessions      Session[] // User sessions (if using database-based sessions)
+}
+
+model Subscription {
+  id            String   @id @default(cuid())  // Unique subscription ID
+  user          User     @relation(fields: [userId], references: [id]) // Links to the user
+  userId        String   @unique // A user can only have one active subscription
+  membership    MembershipType // The membership type
+  status        String   @default("active") // "active", "cancelled", "expired"
+  price         Int      // Price in cents (e.g., 1000 = $10.00)
+  createdAt     DateTime @default(now()) // Subscription creation timestamp
+  expiresAt     DateTime // Expiration date of the subscription
+}
+
+model Account {
+  id                String  @id @default(cuid())  // Unique account ID
+  userId            String  // Foreign key to User
+  provider          String  // OAuth provider (e.g., "github", "google")
+  providerAccountId String  // Unique ID from provider
+  type              String  // Account type (OAuth, credentials, etc.)
+  refresh_token     String? // OAuth refresh token (if applicable)
+  access_token      String? // OAuth access token (if applicable)
+  expires_at        Int?    // Token expiration timestamp (if applicable)
+  token_type        String? // OAuth token type
+  scope             String? // OAuth scope
+  id_token          String? // OpenID Connect ID token (if applicable)
+  session_state     String? // OAuth session state
+
+  user User @relation(fields: [userId], references: [id]) // Link to user
+
+  @@unique([provider, providerAccountId]) // Prevent duplicate accounts
+}
+
+// model Session {
+//   id           String   @id @default(cuid())  // Unique session ID
+//   sessionToken String   @unique  // Unique token for user session
+//   userId       String   // Foreign key to User
+//   expires      DateTime // Expiration time of session
+
+//   user User @relation(fields: [userId], references: [id]) // Link to user
+// }
+
+// model VerificationToken {
+//   identifier String   // Email or phone number being verified
+//   token      String   @unique  // Unique verification token
+//   expires    DateTime // Expiration time of token
+
+//   @@unique([identifier, token]) // Ensure uniqueness of identifier-token pairs
+// }
