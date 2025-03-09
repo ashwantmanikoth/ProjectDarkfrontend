@@ -22,6 +22,5 @@ export const searchDocuments = async (query: string) => {
     const response = await axios.post(`${API_URL}/query`, {
         query: query,
     });
-    console.log(response)
-    return response;
+    return response.data;
 };
