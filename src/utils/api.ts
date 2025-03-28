@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { error } from 'console';
 
 const API_URL = process.env.FLASK_URL || 'http://127.0.0.1:5000';
 
@@ -12,7 +13,9 @@ export const uploadPDF = async (file: File) => {
             'Content-Type': 'multipart/form-data',
         },
     });
-
+    if(response.status!=200){
+        throw new Error('Cannot process now');
+    }
     return response.data;
 };
 
@@ -22,5 +25,5 @@ export const searchDocuments = async (query: string) => {
     const response = await axios.post(`${API_URL}/query`, {
         query: query,
     });
-    return response.data;
+    return response;
 };

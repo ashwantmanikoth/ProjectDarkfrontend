@@ -1,7 +1,8 @@
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { ReactNode } from 'react';
+"use client"
+import { useSession, signOut } from "next-auth/react";
+// Use next/navigation instead of next/router
+import { useRouter } from "next/navigation";
+import { useEffect, ReactNode } from "react";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { data: session, status } = useSession();

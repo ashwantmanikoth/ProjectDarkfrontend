@@ -6,6 +6,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme transition effects */
+* {
+  transition: background-color 0.5s ease-in-out,
+    border-color 0.5s ease-in-out,
+    color 0.5s ease-in-out,
+    fill 0.5s ease-in-out,
+    stroke 0.5s ease-in-out,
+    opacity 0.5s ease-in-out,
+    box-shadow 0.5s ease-in-out,
+    transform 0.5s ease-in-out;
+}
+
+/* Disable transitions for specific elements */
+.no-transition,
+.no-transition * {
+  transition: none !important;
+}
+
 :root {
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -43,6 +61,7 @@
 }
 
 .dark {
+  --text-primary: oklch(0.985 0 0);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.145 0 0);
@@ -115,4 +134,3 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
-

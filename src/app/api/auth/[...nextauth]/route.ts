@@ -2,28 +2,43 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { Session } from "next-auth";
 import { PrismaClient } from "@prisma/client";
-import { NextApiRequest, NextApiResponse } from "next";
-import rateLimit from "express-rate-limit";
 import { User as PrismaUser } from "@prisma/client";
+import { JWT } from "next-auth/jwt";
+import { headers } from "next/headers";
+import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-// Strict Rate Limiter Middleware
-const limiter = rateLimit({
-  windowMs:  1000, // 15 minutes
-  max: 5, // Maximum 5 login attempts per window
-  keyGenerator: (req) => req.ip || "unknown",
-  handler: (_, res) => {
-    return res.status(429).json({ error: "Too many login attempts. Try again later." });
-  },
-});
+// Rate limiting using a simple in-memory store
+const rateLimit = new Map<string, { count: number; timestamp: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_REQUESTS = 5;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const userLimit = rateLimit.get(ip);
+
+  if (!userLimit) {
+    rateLimit.set(ip, { count: 1, timestamp: now });
+    return false;
+  }
+
+  if (now - userLimit.timestamp > RATE_LIMIT_WINDOW) {
+    rateLimit.set(ip, { count: 1, timestamp: now });
+    return false;
+  }
+
+  if (userLimit.count >= MAX_REQUESTS) {
+    return true;
+  }
+
+  userLimit.count++;
+  return false;
+}
 
 // Allowed email domains (Optional)
 // const allowedDomains = ["example.com", "yourdomain.com"];
-
-import { JWT } from "next-auth/jwt";
 
 export interface CustomToken extends JWT {
   id: string;
@@ -62,15 +77,16 @@ export const authOptions: NextAuthOptions = {
   //   },
   // },
   callbacks: {
-    
     async signIn({ user, account, profile, email }) {
       console.log(`SignIn Attempt - User: ${user.email}`);
 
+      // Get IP from headers
+      const headersList = headers();
+      const ip = headersList.get("x-forwarded-for") || "unknown";
+
       // Apply Rate Limiting
-      try {
-        await new Promise((resolve, reject) => limiter({} as NextApiRequest, {} as NextApiResponse, resolve));
-      } catch (err) {
-        console.warn("Rate limit exceeded:", user.email);
+      if (isRateLimited(ip)) {
+        console.warn("Rate limit exceeded:", ip);
         return false;
       }
 
@@ -97,7 +113,7 @@ export const authOptions: NextAuthOptions = {
       console.log("JWT Callback - Token before:", user);
 
       if (user) {
-        token.id = user.id 
+        token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.picture = user.image;
@@ -106,31 +122,26 @@ export const authOptions: NextAuthOptions = {
       console.log("JWT Callback - Token after:", token);
       return token;
     },
-    // async session({ session, token}: { session: Session, token: JWT & CustomToken }): Promise<Session> {
-    //   console.log("Session Callback - Token:", token);
 
-    //   if (!token?.id) {
-    //     console.error("Session Error: Token ID is undefined!");
-    //     return session;
-    //   }
-
-    //   session.user.id = token.id;
-    //   session.user.email = token.email;
-    //   session.user.name = token.name;
-    //   session.user.image = token.picture;
-
-    //   return session;
-    // },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        session.user.image = token.picture as string;
+      }
+      return session;
+    },
   },
   pages: {
-    signIn: "/auth/login",
-    error: "/auth/error",
+    signIn: "/login",
+    error: "/error",
   },
   debug: process.env.NODE_ENV !== "production",
 };
 
 // Secure API Route for Authenticat
-export const handler = NextAuth(authOptions);
+const handler = NextAuth(authOptions);
 
-export {handler as GET,handler as POST};
+export { handler as GET, handler as POST };
 
