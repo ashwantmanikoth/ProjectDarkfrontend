@@ -1,8 +1,8 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import AnimatedHeading from "@/components/ui/AnimateHeading";
 import { HEAD_LINES, LOGIN_HEADER } from "@/lib/constants";
 import { Github } from "lucide-react";
@@ -29,12 +29,15 @@ export default function LoginPage() {
         signInRef.current.scrollIntoView({ behavior: "smooth" });
       }
     }, totalDelay);
-
     return () => clearTimeout(timer);
   }, [HEAD_LINES]);
 
+  // Show loading state while checking authentication
   if (status === "loading") {
-    return <div>Loading...</div>;
+    console.log("LoginPage - Loading state");
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+    </div>;
   }
 
   return (
@@ -50,17 +53,16 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold text-center mb-6">
             {LOGIN_HEADER}
           </h1>
-          {!session ? (
-            <div className="space-y-4 s">
-              <button
+          <div className="space-y-4">
+            <button
                 onClick={() => signIn("github")}
                 className="flex items-center justify-center bg-black hover:bg-gray-100  hover:text-black transition-colors duration-200 text-white py-3 px-4 rounded-md w-full"
               >
-                <Github />
-                Sign in with GitHub
-              </button>
+              <Github className="mr-2" />
+              Sign in with GitHub
+            </button>
 
-              <button
+            <button
                 onClick={() => signIn("google")}
                 className="flex items-center justify-center bg-red-700 hover:bg-gray-100 hover:text-black transition-colors duration-200 text-white py-3 px-4 rounded-md w-full"
               >
@@ -91,20 +93,6 @@ export default function LoginPage() {
                 Sign in with Google
               </button>
             </div>
-          ) : (
-            <div>
-              <p className="text-center mb-4">
-                You are signed in as{" "}
-                <span className="font-semibold">{session.user?.email}</span>
-              </p>
-              <button
-                onClick={() => signOut()}
-                className="w-full bg-gray-800 hover:bg-gray-700 transition-colors duration-200 text-white py-3 px-4 rounded-md"
-              >
-                Sign Out
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </>

@@ -29,7 +29,6 @@ const notifications = [
 ];
 
 const NotificationDropdown = ({ hasNewNotifications }: { hasNewNotifications: boolean }) => {
-  console.log(hasNewNotifications)
   const [isNotification, setIsNotification] = useState(false);
   
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -52,7 +51,7 @@ const NotificationDropdown = ({ hasNewNotifications }: { hasNewNotifications: bo
   }, []);
 
   return (
-    <div className="relative inline-block mt-2 z-10" ref={notificationRef}>
+    <div className="relative inline-block  z-10" ref={notificationRef}>
       <button
         onClick={toggleNotification}
         className="flex items-center focus:outline-none"

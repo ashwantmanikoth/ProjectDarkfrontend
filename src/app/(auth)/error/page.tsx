@@ -6,17 +6,19 @@ import Link from "next/link";
 export default function AuthError() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const errorMessage = searchParams.get("message");
 
   const errorMessages = {
     Configuration: "There is a problem with the server configuration.",
     AccessDenied: "You do not have permission to sign in.",
     Verification: "The verification token has expired or has already been used.",
+    OAuthAccountNotLinked: "An account with this email already exists. Please sign in with the original provider.",
     Default: "An error occurred while trying to sign in.",
   };
 
-  const errorMessage = error && error in errorMessages
+  const displayMessage = errorMessage || (error && error in errorMessages
     ? errorMessages[error as keyof typeof errorMessages]
-    : errorMessages.Default;
+    : errorMessages.Default);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
@@ -24,7 +26,7 @@ export default function AuthError() {
         <h1 className="text-3xl font-bold text-center mb-6 text-red-600">
           Authentication Error
         </h1>
-        <p className="text-center mb-6 text-gray-600">{errorMessage}</p>
+        <p className="text-center mb-6 text-gray-600">{displayMessage}</p>
         <div className="flex justify-center">
           <Link
             href="/login"

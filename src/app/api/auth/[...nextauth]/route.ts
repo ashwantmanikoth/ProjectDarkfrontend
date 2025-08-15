@@ -4,7 +4,6 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import { User as PrismaUser } from "@prisma/client";
-import { JWT } from "next-auth/jwt";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -40,14 +39,6 @@ function isRateLimited(ip: string): boolean {
 // Allowed email domains (Optional)
 // const allowedDomains = ["example.com", "yourdomain.com"];
 
-export interface CustomToken extends JWT {
-  id: string;
-  email: string;
-  name: string;
-  picture: string;
-}
-
-// Strictly Typed AuthOptions
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -61,7 +52,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   session: {
-    strategy: "jwt", // Use JWT-based sessions
+    strategy: "database",
     maxAge: 60 * 60 * 24 * 7, // 7 days
   },
   // cookies: {
@@ -81,7 +72,7 @@ export const authOptions: NextAuthOptions = {
       console.log(`SignIn Attempt - User: ${user.email}`);
 
       // Get IP from headers
-      const headersList = headers();
+      const headersList = await headers();
       const ip = headersList.get("x-forwarded-for") || "unknown";
 
       // Apply Rate Limiting
@@ -100,35 +91,35 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
-      // Enforce Email Domain Restrictions (Optional)
-      // if (!allowedDomains.some(domain => user.email?.endsWith(`@${domain}`))) {
-      //   console.warn("Unauthorized Domain:", user.email);
-      //   return false; // Deny login for unauthorized domains
-      // }
-
-      return true; // Allow login
-    },
-
-    async jwt({ token, user, account, profile }) {
-      console.log("JWT Callback - Token before:", user);
-
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
-        token.picture = user.image;
+      // If this is a new user, allow sign in
+      if (!dbUser) {
+        return true;
       }
 
-      console.log("JWT Callback - Token after:", token);
-      return token;
-    },
+      // Check if user already has an account with a different provider
+      const existingAccounts = await prisma.account.findMany({
+        where: {
+          userId: dbUser.id,
+        },
+      });
 
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
-        session.user.image = token.picture as string;
+      // If user has existing accounts with different providers
+      if (existingAccounts.length > 0) {
+        const existingProvider = existingAccounts[0].provider;
+        if (existingProvider !== account?.provider) {
+          // Return false with a custom error message
+          throw new Error(`An account with this email already exists. Please sign in with ${existingProvider}.`);
+        }
+      }
+
+      return true;
+    },
+    async session({ session, user }) {
+      if (session.user) {
+        session.user.id = user.id;
+        session.user.email = user.email ?? "";
+        session.user.name = user.name ?? "";
+        session.user.image = user.image ?? "";
       }
       return session;
     },

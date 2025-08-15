@@ -1,5 +1,7 @@
 // components/AppSidebar.jsx
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import { Home, FolderOpen, Upload, Search, Settings } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -13,14 +15,15 @@ import {
 
 // Menu items.
 const items = [
-  { title: "Home", url: "#", icon: Home },
-  { title: "Inbox", url: "#", icon: Inbox },
-  { title: "Calendar", url: "#", icon: Calendar },
-  { title: "Search", url: "#", icon: Search },
-  { title: "Settings", url: "#", icon: Settings },
+  { title: "Groups", url: "/", icon: Home },
+  { title: "Upload", url: "/upload", icon: Upload },
+  { title: "Search", url: "/search", icon: Search },
+  { title: "Settings", url: "/profile", icon: Settings },
 ];
 
 export function AppSidebar() {
+  const pathname = usePathname();
+
   return (
     <Sidebar collapsible="icon" variant="sidebar" >
       <SidebarContent className="inline-block">
@@ -30,10 +33,13 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link 
+                      href={item.url}
+                      className={pathname === item.url ? "bg-accent" : ""}
+                    >
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
