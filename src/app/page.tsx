@@ -10,9 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Group, Plus, FolderOpen, Upload, Search, MessageSquare, Clock, FileText } from "lucide-react";
+import { Group, Plus, FolderOpen, Upload, Search, MessageSquare, Clock, FileText, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Group as GroupType } from "@/types";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { Backdrop } from "@/components/ui/backdrop";
+import { validateGroupName, getGroupNameErrorMessage } from "@/utils/input-sanitizer";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const HomePage = () => {
   const { data: session, status } = useSession();
@@ -22,6 +26,21 @@ const HomePage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDescription, setNewGroupDescription] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    groupId: string | null;
+    groupName: string;
+  }>({
+    isOpen: false,
+    groupId: null,
+    groupName: "",
+  });
+
+  // Validation and loading states
+  const [groupNameError, setGroupNameError] = useState<string>("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingGroupId, setDeletingGroupId] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -56,10 +75,18 @@ const HomePage = () => {
   }, [status]);
 
   const handleCreateGroup = async () => {
-    if (!newGroupName.trim()) {
-      toast.error("Group name is required");
+    // Validate group name
+    const validation = validateGroupName(newGroupName.trim());
+    if (!validation.isValid) {
+      setGroupNameError(getGroupNameErrorMessage(validation));
       return;
     }
+
+    // Clear any previous errors
+    setGroupNameError("");
+
+    // Set loading state
+    setIsCreating(true);
 
     try {
       const response = await fetch("/api/groups", {
@@ -68,7 +95,7 @@ const HomePage = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: newGroupName.trim(),
+          name: validation.sanitizedValue,
           description: newGroupDescription.trim() || undefined,
         }),
       });
@@ -86,13 +113,15 @@ const HomePage = () => {
     } catch (error) {
       console.error("Error creating group:", error);
       toast.error("Failed to create group");
+    } finally {
+      setIsCreating(false);
     }
   };
 
   const handleDeleteGroup = async (groupId: string) => {
-    if (!confirm("Are you sure you want to delete this group? This will also delete all documents in the group.")) {
-      return;
-    }
+    // Set loading state for specific group
+    setDeletingGroupId(groupId);
+    setIsDeleting(true);
 
     try {
       const response = await fetch(`/api/groups/${groupId}`, {
@@ -108,6 +137,38 @@ const HomePage = () => {
     } catch (error) {
       console.error("Error deleting group:", error);
       toast.error("Failed to delete group");
+    } finally {
+      setIsDeleting(false);
+      setDeletingGroupId(null);
+    }
+  };
+
+  const openDeleteConfirmation = (groupId: string, groupName: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      groupId,
+      groupName,
+    });
+  };
+
+  // Debounced group creation to prevent multiple rapid submissions
+  const [debouncedCreateGroup, isCreatePending] = useDebounce(handleCreateGroup, 500);
+
+  // Real-time validation for group name
+  const handleGroupNameChange = (value: string) => {
+    setNewGroupName(value);
+    
+    // Clear error when user starts typing
+    if (groupNameError) {
+      setGroupNameError("");
+    }
+
+    // Validate in real-time (debounced)
+    if (value.trim().length >= 3) {
+      const validation = validateGroupName(value.trim());
+      if (!validation.isValid) {
+        setGroupNameError(getGroupNameErrorMessage(validation));
+      }
     }
   };
 
@@ -148,8 +209,9 @@ const HomePage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
+                variant="default"
                 onClick={() => setIsCreateModalOpen(true)}
-                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-secondary hover:text-secondary-foreground transition-all duration-300 transform hover:scale-105"
+                className="px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Create New Group
@@ -157,7 +219,7 @@ const HomePage = () => {
               <Button
                 variant="outline"
                 onClick={() => router.push("/upload")}
-                className="px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
+                className="px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 border-border bg-card text-card-foreground hover:bg-accent hover:text-accent-foreground"
               >
                 <Upload className="w-5 h-5 mr-2" />
                 Upload Documents
@@ -211,11 +273,17 @@ const HomePage = () => {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeleteGroup(group.id);
+                            openDeleteConfirmation(group.id, group.name);
                           }}
-                          className="h-6 px-2 text-xs text-destructive hover:text-destructive"
+                          disabled={isDeleting && deletingGroupId === group.id}
+                          className="h-6 px-2 text-xs text-destructive hover:text-destructive min-w-[60px]"
                         >
-                          Delete
+                          {isDeleting && deletingGroupId === group.id ? (
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-3 h-3 mr-1" />
+                          )}
+                          {isDeleting && deletingGroupId === group.id ? 'Deleting...' : 'Delete'}
                         </Button>
                       </div>
                     </div>
@@ -242,10 +310,29 @@ const HomePage = () => {
             </div>
           )}
 
+          {/* Delete Confirmation Dialog */}
+          <ConfirmationDialog
+            isOpen={deleteConfirmation.isOpen}
+            onClose={() => setDeleteConfirmation({ isOpen: false, groupId: null, groupName: "" })}
+            onConfirm={() => {
+              if (deleteConfirmation.groupId) {
+                handleDeleteGroup(deleteConfirmation.groupId);
+                setDeleteConfirmation({ isOpen: false, groupId: null, groupName: "" });
+              }
+            }}
+            title="Delete Group"
+            description={`Are you sure you want to delete "${deleteConfirmation.groupName}"? This will also delete all documents in the group.`}
+            confirmText={isDeleting ? "Deleting..." : "Delete Group"}
+            cancelText="Cancel"
+            variant="destructive"
+            icon={<Trash2 className="w-6 h-6 text-destructive" />}
+            disabled={isDeleting}
+          />
+
           {/* Create Group Modal */}
           {isCreateModalOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-card p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <Backdrop>
+              <div className="bg-card p-6 rounded-lg shadow-xl max-w-md w-full mx-4 border border-border/50 transition-all duration-200 scale-100 dark:shadow-2xl dark:shadow-black/20">
                 <h2 className="text-xl font-semibold mb-4">Create New Group</h2>
                 <div className="space-y-4">
                   <div>
@@ -253,10 +340,16 @@ const HomePage = () => {
                     <Input
                       id="group-name"
                       value={newGroupName}
-                      onChange={(e) => setNewGroupName(e.target.value)}
-                      placeholder="e.g., Work Documents, Research Papers"
-                      className="mt-1"
+                      onChange={(e) => handleGroupNameChange(e.target.value)}
+                      placeholder="e.g., Work Documents, Research Papers (min. 5 characters)"
+                      className={`mt-1 ${groupNameError ? 'border-destructive' : ''}`}
                     />
+                    {groupNameError && (
+                      <p className="text-sm text-destructive mt-1">{groupNameError}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Minimum 5 characters, letters, numbers, and spaces only
+                    </p>
                   </div>
                   <div>
                     <Label htmlFor="group-description">Description (Optional)</Label>
@@ -279,13 +372,24 @@ const HomePage = () => {
                     >
                       Cancel
                     </Button>
-                    <Button onClick={handleCreateGroup}>
-                      Create Group
+                    <Button 
+                      onClick={debouncedCreateGroup}
+                      disabled={isCreating || isCreatePending || !!groupNameError || newGroupName.trim().length < 5}
+                      className="min-w-[120px]"
+                    >
+                      {isCreating || isCreatePending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        'Create Group'
+                      )}
                     </Button>
                   </div>
                 </div>
               </div>
-            </div>
+            </Backdrop>
           )}
         </div>
       </AppLayout>

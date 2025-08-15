@@ -18,6 +18,308 @@
     transform 0.5s ease-in-out;
 }
 
+/* Base theme colors for html and body */
+html {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+}
+
+/* Ensure root layout gets proper background */
+#__next,
+#root,
+[data-nextjs-page] {
+  background-color: var(--background);
+  min-height: 100vh;
+}
+
+/* Force background on all direct children */
+body > * {
+  background-color: var(--background);
+}
+
+/* Ensure all page containers get the theme background */
+.dark .page-container,
+.dark .app-container,
+.dark .main-container {
+  background-color: var(--background);
+}
+
+/* Force background on all utility classes except buttons and specific elements */
+.dark [class*="bg-"]:not(button):not(.bg-primary):not(.bg-secondary):not(.bg-destructive):not(.bg-accent):not(.bg-card) {
+  background-color: var(--background);
+}
+
+/* Override specific background utilities */
+.dark .bg-card {
+  background-color: var(--card) !important;
+}
+
+.dark .bg-secondary {
+  background-color: var(--secondary) !important;
+}
+
+.dark .bg-muted {
+  background-color: var(--muted) !important;
+}
+
+.dark .bg-accent {
+  background-color: var(--accent) !important;
+}
+
+/* Night theme enhancements */
+.dark {
+  /* Subtle background gradient for depth */
+  background: linear-gradient(135deg,
+      var(--background) 0%,
+      oklch(0.18 0.025 240) 50%,
+      var(--background) 100%);
+}
+
+.dark html {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.dark body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.dark #__next {
+  background: var(--background);
+}
+
+.dark .bg-background {
+  background-color: var(--background) !important;
+}
+
+/* Ensure all main containers use the proper background */
+.dark main,
+.dark .container,
+.dark .mx-auto,
+.dark .px-4,
+.dark .py-8,
+.dark .min-h-screen,
+.dark .flex,
+.dark .items-center,
+.dark .justify-center {
+  background-color: var(--background);
+}
+
+/* Additional background utilities for dark mode */
+.dark .bg-card {
+  background-color: var(--card);
+}
+
+.dark .bg-secondary {
+  background-color: var(--secondary);
+}
+
+.dark .bg-muted {
+  background-color: var(--muted);
+}
+
+/* Force background colors on all page elements */
+.dark div,
+.dark section,
+.dark article,
+.dark aside,
+.dark header,
+.dark footer {
+  background-color: inherit;
+}
+
+/* Ensure all elements get the theme background */
+.dark * {
+  background-color: inherit;
+}
+
+/* Override specific elements that need explicit backgrounds */
+.dark .bg-card,
+.dark .bg-secondary,
+.dark .bg-muted,
+.dark .bg-accent {
+  background-color: var(--card), var(--secondary), var(--muted), var(--accent) !important;
+}
+
+/* Specific page layout elements */
+.dark .bg-background {
+  background-color: var(--background) !important;
+}
+
+.dark .text-center {
+  background-color: var(--background);
+}
+
+.dark .grid {
+  background-color: var(--background);
+}
+
+.dark .py-16 {
+  background-color: var(--background);
+}
+
+/* Main page specific containers */
+.dark .container {
+  background-color: var(--background);
+}
+
+.dark .px-4 {
+  background-color: var(--background);
+}
+
+.dark .py-8 {
+  background-color: var(--background);
+}
+
+.dark .mb-12 {
+  background-color: var(--background);
+}
+
+.dark .text-center {
+  background-color: var(--background);
+}
+
+.dark .max-w-2xl {
+  background-color: var(--background);
+}
+
+.dark .mx-auto {
+  background-color: var(--background);
+}
+
+.dark .grid {
+  background-color: var(--background);
+}
+
+.dark .gap-6 {
+  background-color: var(--background);
+}
+
+.dark .py-16 {
+  background-color: var(--background);
+}
+
+.dark .mb-6 {
+  background-color: var(--background);
+}
+
+.dark .mb-2 {
+  background-color: var(--background);
+}
+
+.dark .mb-4 {
+  background-color: var(--background);
+}
+
+/* Layout component specific */
+.dark main {
+  background-color: var(--background);
+}
+
+.dark .min-h-screen {
+  background-color: var(--background);
+}
+
+.dark .flex {
+  background-color: var(--background);
+}
+
+.dark .items-center {
+  background-color: var(--background);
+}
+
+.dark .justify-center {
+  background-color: var(--background);
+}
+
+/* Ensure all flexbox containers get background */
+.dark .flex-col,
+.dark .flex-row,
+.dark .sm\\:flex-row {
+  background-color: var(--background);
+}
+
+/* Ensure all gap utilities get background */
+.dark .gap-4,
+.dark .gap-2,
+.dark .gap-3 {
+  background-color: var(--background);
+}
+
+/* Enhanced shadows for night theme */
+.dark .shadow-xl {
+  box-shadow: 
+    0 20px 25px -5px var(--night-shadow),
+    0 10px 10px -5px var(--night-shadow),
+    0 0 0 1px var(--night-glow);
+}
+
+.dark .shadow-2xl {
+  box-shadow: 
+    0 25px 50px -12px var(--night-shadow),
+    0 0 0 1px var(--night-glow);
+}
+
+/* Button visibility enhancements for dark theme */
+.dark button {
+  border: 1px solid transparent;
+}
+
+/* Force button background colors and ensure visibility */
+.dark button.bg-primary,
+.dark .bg-primary {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border-color: var(--primary) !important;
+}
+
+.dark button.bg-secondary,
+.dark .bg-secondary {
+  background-color: var(--secondary) !important;
+  color: var(--secondary-foreground) !important;
+  border-color: var(--secondary) !important;
+}
+
+.dark button.bg-destructive,
+.dark .bg-destructive {
+  background-color: var(--destructive) !important;
+  color: var(--destructive-foreground) !important;
+  border-color: var(--destructive) !important;
+}
+
+.dark button.bg-accent,
+.dark .bg-accent {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+  border-color: var(--accent) !important;
+}
+
+.dark button.bg-card,
+.dark .bg-card {
+  background-color: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border-color: var(--border) !important;
+}
+
+/* Ensure button text is always visible */
+.dark button[class*="bg-"] {
+  color: inherit !important;
+}
+
+/* Additional button styling for better visibility */
+.dark button:not([class*="bg-"]) {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border-color: var(--border);
+}
+
 /* Disable transitions for specific elements */
 .no-transition,
 .no-transition * {
@@ -61,39 +363,45 @@
 }
 
 .dark {
-  --text-primary: oklch(0.985 0 0);
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Night Theme - Sophisticated deep blues and warm accents */
+  --text-primary: oklch(0.98 0.005 240);
+  --background: oklch(0.18 0.02 240);
+  --foreground: oklch(0.98 0.005 240);
+  --card: oklch(0.18 0.02 240);
+  --card-foreground: oklch(0.98 0.005 240);
+  --popover: oklch(0.18 0.02 240);
+  --popover-foreground: oklch(0.98 0.005 240);
+  --primary: oklch(0.65 0.25 240);
+  --primary-foreground: oklch(0.98 0.005 240);
+  --secondary: oklch(0.25 0.05 240);
+  --secondary-foreground: oklch(0.95 0.01 240);
+  --muted: oklch(0.22 0.03 240);
+  --muted-foreground: oklch(0.75 0.02 240);
+  --accent: oklch(0.28 0.06 240);
+  --accent-foreground: oklch(0.95 0.01 240);
+  --destructive: oklch(0.65 0.25 25);
+  --destructive-foreground: oklch(0.98 0.005 240);
+  --border: oklch(0.28 0.05 240);
+  --input: oklch(0.28 0.05 240);
+  --ring: oklch(0.65 0.25 240);
+  --chart-1: oklch(0.65 0.25 240);
+  --chart-2: oklch(0.7 0.2 180);
+  --chart-3: oklch(0.75 0.18 120);
+  --chart-4: oklch(0.6 0.3 300);
+  --chart-5: oklch(0.7 0.2 60);
+  --sidebar: oklch(0.12 0.015 240);
+  --sidebar-foreground: oklch(0.95 0.01 240);
+  --sidebar-primary: oklch(0.65 0.25 240);
+  --sidebar-primary-foreground: oklch(0.12 0.015 240);
+  --sidebar-accent: oklch(0.25 0.05 240);
+  --sidebar-accent-foreground: oklch(0.95 0.01 240);
+  --sidebar-border: oklch(0.28 0.05 240);
+  --sidebar-ring: oklch(0.65 0.25 240);
+
+  /* Enhanced night theme with subtle gradients and shadows */
+  --night-glow: oklch(0.65 0.25 240 / 0.1);
+  --night-shadow: oklch(0.02 0.01 240 / 0.3);
+  --night-highlight: oklch(0.85 0.08 240 / 0.05);
 }
 
 @theme inline {
@@ -134,4 +442,3 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
-

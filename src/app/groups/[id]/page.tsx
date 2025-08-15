@@ -33,6 +33,7 @@ import {
   Plus
 } from "lucide-react";
 import { toast } from "sonner";
+import { Backdrop } from "@/components/ui/backdrop";
 
 const GroupPage = () => {
   const { data: session, status } = useSession();
@@ -520,8 +521,8 @@ const GroupPage = () => {
 
           {/* Upload Modal */}
           {isUploadModalOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-card p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <Backdrop>
+              <div className="bg-card p-6 rounded-lg shadow-xl max-w-md w-full mx-4 border border-border/50 transition-all duration-200 scale-100 dark:shadow-2xl dark:shadow-black/20">
                 <h2 className="text-xl font-semibold mb-4">Upload Document to {group.name}</h2>
                 <div className="space-y-4">
                   {!isUploading ? (
@@ -585,13 +586,13 @@ const GroupPage = () => {
                   )}
                 </div>
               </div>
-            </div>
+            </Backdrop>
           )}
 
           {/* Question Modal */}
           {isQuestionModalOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-card p-6 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <Backdrop>
+              <div className="bg-card p-6 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto border border-border/50 transition-all duration-200 scale-100 dark:shadow-2xl dark:shadow-black/20">
                 <h2 className="text-xl font-semibold mb-4">Ask a Question about {group.name}</h2>
                 <div className="space-y-4">
                   <div>
@@ -654,7 +655,7 @@ const GroupPage = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </Backdrop>
           )}
         </div>
       </AppLayout>
